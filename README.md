@@ -92,6 +92,7 @@ Use the commit tag (or image digest) in deployments to identify the exact source
 The webtop and Zenmap inputs are pinned to the digests tested in the live lab;
 update those pins deliberately when upgrading the base images.
 The image carries its source revision as an OCI label.
+Manual pages are enabled in the image; the build verifies that `man nmap` renders successfully.
 
 The repository moved to `notrainer/no_trainer_client`. Existing clones should use
 `git remote set-url origin git@github.com:notrainer/no_trainer_client.git`.
