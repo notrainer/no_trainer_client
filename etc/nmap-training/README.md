@@ -42,6 +42,9 @@ sudo env SCAN_INTERFACE="$SCAN_INTERFACE" /opt/nmap-training/scripts/multicast-r
 | --- | --- |
 | `handouts/*` | Ziel-/DNS-Listen, Protokollblatt und fiktive Inventar-/Traffic-Daten |
 | `examples/excluded.txt` | D1.1: `.40` aus einer Inputliste ausschließen |
+| `examples/hello.lua` | D2.5: erste Ausgabe, CLI-Argument und Default |
+| `examples/status-check.lua` | D2.5: Function, Zahlenumwandlung und Statusvergleich |
+| `examples/inventory.lua` | D2.5: Tables, Schleife und Review-Zähler mit Lehrdaten |
 | `examples/http.args` | D2.4: HTTP-GET auf `/maintenance/` |
 | `examples/dns-brute.args` | D2.2: kleine DNS-Kandidatenliste |
 | `examples/ldap.args` | D2.4-F: begrenzte Suche mit öffentlichen Lab-Zugangsdaten |
@@ -57,6 +60,10 @@ Beispielaufrufe dort:
 
 ```bash
 ./web-baseline.sh day1-web-before
+lua hello.lua Ada
+lua status-check.lua 200
+lua status-check.lua 401
+lua inventory.lua
 nmap -n -sL -iL targets.txt --excludefile excluded.txt
 nmap -n -sT -p 80 --script http-headers --script-args-file http.args \
   --script-timeout 20s appliance appliance-managed -oA d2-http-repeat
@@ -71,7 +78,12 @@ sudo ./capture-discovery.sh day3-discovery.pcapng
 nmap -n -sT -sV -p 80 --script ~/http-shop-policy.nse appliance appliance-managed
 ```
 
-Scans und Captures starten ausschließlich mit einem manuellen Aufruf. Die
-Einrichtung setzt nur die zwei konkreten Multicast-Routen und kopiert Referenzen.
+Scans und Captures starten ausschließlich mit einem manuellen Aufruf.
+Lua-Referenzen verwenden feste Lehrdaten und erzeugen keinen Netzwerkverkehr.
+Für den Einstieg zuerst eigene `my-*.lua`-Dateien tippen; danach die Referenzen
+vergleichen. `lua` führt sie aus, `luac -p my-hello.lua` prüft nur die Syntax.
+NSE-Scripts laufen dagegen mit `nmap` und dessen integrierter Lua-Laufzeit.
+
+Die Einrichtung setzt nur die zwei konkreten Multicast-Routen und kopiert Referenzen.
 `switch-ports.csv` und `traffic-summary.csv` enthalten ausdrücklich fiktive Daten.
 Trainerlösungen aus `tasks.txt` werden nicht ins Image kopiert.

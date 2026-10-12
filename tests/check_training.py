@@ -1,9 +1,8 @@
 """Run without containers: python3 tests/check_training.py."""
 import os
-from pathlib import Path
 import subprocess
 import tempfile
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TRAINING = ROOT / "etc/nmap-training"
@@ -56,16 +55,28 @@ fi
         setup = (TRAINING / "scripts/setup-training.sh").read_text()
         run_shell(setup)
         results = Path(env["HOME"]) / "nmap-training-results"
-        for name in ("targets.txt", "excluded.txt", "http.args", "dns-brute.args", "ldap.args",
-                     "capture-discovery.sh", "read-nmap-xml.py"):
+        for name in (
+            "targets.txt",
+            "excluded.txt",
+            "http.args",
+            "dns-brute.args",
+            "ldap.args",
+            "capture-discovery.sh",
+            "read-nmap-xml.py",
+            "hello.lua",
+            "status-check.lua",
+            "inventory.lua",
+        ):
             assert (results / name).is_file(), name
         (results / "http.args").write_text("participant edits\n")
+        (results / "inventory.lua").write_text("-- participant Lua edits\n")
         nse_copy = Path(env["HOME"]) / "http-shop-policy.nse"
         nse_copy.write_text("participant NSE edits\n")
         (results / "targets.txt").unlink()
         (results / "targets.txt").symlink_to(scratch / "participant-targets.txt")
         run_shell(setup)
         assert (results / "http.args").read_text() == "participant edits\n"
+        assert (results / "inventory.lua").read_text() == "-- participant Lua edits\n"
         assert nse_copy.read_text() == "participant NSE edits\n"
         assert (results / "targets.txt").is_symlink()
 
@@ -73,15 +84,26 @@ fi
         for name, body in {
             "chpasswd": '#!/bin/bash\ncat > "$TEST_PASSWORD_INPUT"\n',
             "passwd": '#!/bin/bash\nprintf "%s\\n" "$*" > "$TEST_PASSWORD_LOCK"\n',
-            "s6-setuidgid": '#!/bin/bash\nexit 0\n',
+            "s6-setuidgid": "#!/bin/bash\nexit 0\n",
         }.items():
             mock = scratch / name
             mock.write_text(body)
             mock.chmod(0o755)
         password_input = scratch / "password-input"
         password_lock = scratch / "password-lock"
-        initialization = (TRAINING / "init-training.sh").read_text().replace('"$NMAP_TRAINING/scripts/multicast-routes.sh"', "/usr/bin/true")
-        run_shell(initialization, {"SSH_PASSWORD": "generated-test-password", "TEST_PASSWORD_INPUT": str(password_input), "TEST_PASSWORD_LOCK": str(password_lock)})
+        initialization = (
+            (TRAINING / "init-training.sh")
+            .read_text()
+            .replace('"$NMAP_TRAINING/scripts/multicast-routes.sh"', "/usr/bin/true")
+        )
+        run_shell(
+            initialization,
+            {
+                "SSH_PASSWORD": "generated-test-password",
+                "TEST_PASSWORD_INPUT": str(password_input),
+                "TEST_PASSWORD_LOCK": str(password_lock),
+            },
+        )
         assert password_input.read_text() == "abc:generated-test-password\n"
         assert not password_lock.exists(), "Configured password must stay unlocked"
         password_input.unlink()

@@ -23,10 +23,14 @@ Argumentdateien und Hilfsscripts aus dem aktuellen Nmap-Training unter
 `/opt/nmap-training/` erreichbar; Bind-Mounts aus dem Präsentationsrepository
 sind nicht mehr erforderlich. DNS-/Capture-Werkzeuge sowie die optionalen
 SMB-/PostgreSQL-Clients werden beim Image-Build installiert.
+Für den Lua-Einstieg an Tag 2 sind außerdem `lua`, `luac` und drei eigenständige
+Beispielprogramme enthalten. Die Beispiele verwenden feste Lehrwerte und führen
+keine Scans aus; Nmap bringt für NSE weiterhin seine eigene Lua-Laufzeit mit.
 
 Beim Start werden fehlende Arbeitskopien für den Desktop-Benutzer in
 `~/nmap-training-results/` und `~/http-shop-policy.nse` angelegt. Neustarts und
 `setup-training.sh` überschreiben keine vorhandenen Teilnehmerdateien.
+Die Lua-Beispiele liegen ebenfalls als bearbeitbare Kopien im Ergebnisordner.
 Vor einer Neuerstellung des Containers die Ergebnisse weiterhin sichern.
 
 `SCAN_NETWORK` (Standard `172.28.50.0/24`) und ein optionales `SCAN_INTERFACE`
