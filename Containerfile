@@ -4,7 +4,9 @@ FROM lscr.io/linuxserver/webtop:fedora-xfce@sha256:953cf5572a4834bb28b127e2253fd
 # The base image skips documentation; keep manuals and restore any inherited packages' pages.
 RUN sed -i '/^[[:space:]]*tsflags[[:space:]]*=/d' /etc/dnf/dnf.conf \
     && dnf update -y && dnf install -y bash-completion man man-pages nmap openssh-server iputils iproute vim \
-    python3 lua wireshark-cli tcpdump curl bind-utils nmap-ncat git samba-client postgresql diffutils xmlstarlet \
+    python3 lua wireshark wireshark-cli tcpdump curl bind-utils nmap-ncat git samba-client postgresql diffutils xmlstarlet \
+    && usermod -aG wireshark abc \
+    && wireshark --version > /dev/null \
     && dnf reinstall -y nmap man-pages \
     && man -P cat nmap > /dev/null
 COPY /etc /etc

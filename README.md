@@ -22,7 +22,9 @@ Argumentdateien und Hilfsscripts aus dem aktuellen Nmap-Training unter
 [`etc/nmap-training/`](etc/nmap-training/README.md). Sie sind im Container unter
 `/opt/nmap-training/` erreichbar; Bind-Mounts aus dem Präsentationsrepository
 sind nicht mehr erforderlich. DNS-/Capture-Werkzeuge sowie die optionalen
-SMB-/PostgreSQL-Clients werden beim Image-Build installiert.
+SMB-/PostgreSQL-Clients werden beim Image-Build installiert. Wireshark ist als
+grafische Anwendung und mit den CLI-Werkzeugen enthalten; der Desktop-Benutzer
+`abc` gehört zur Gruppe `wireshark` und kann im Lab ohne sudo Pakete mitschneiden.
 Für den Lua-Einstieg an Tag 2 sind außerdem `lua`, `luac` und drei eigenständige
 Beispielprogramme enthalten. Die Beispiele verwenden feste Lehrwerte und führen
 keine Scans aus; Nmap bringt für NSE weiterhin seine eigene Lua-Laufzeit mit.
