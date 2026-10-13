@@ -33,6 +33,14 @@ Beim Start werden fehlende Arbeitskopien für den Desktop-Benutzer in
 Die Lua-Beispiele liegen ebenfalls als bearbeitbare Kopien im Ergebnisordner.
 Vor einer Neuerstellung des Containers die Ergebnisse weiterhin sichern.
 
+Auf dem Desktop liegt außerdem `nmap-visualizer.html`. Per Doppelklick im Browser
+öffnen und einen Nmap-XML-Bericht laden; die Berichte bleiben lokal im Browser.
+Für die Darstellung ist Internetzugang erforderlich (Tailwind von jsDelivr).
+Vorhandene Desktop-Dateien werden beim Start nicht überschrieben. Die gebündelte
+Kopie unter `etc/nmap-training/nmap-visualizer.html` stammt aus
+`../no_trainer/standalone/nmap-visualizer.html`; bei Änderungen diese Kopie
+aktualisieren und das Client-Image neu bauen.
+
 `SCAN_NETWORK` (Standard `172.28.50.0/24`) und ein optionales `SCAN_INTERFACE`
 konfigurieren das Übungsnetz. Ohne Interface-Vorgabe wird die direkte Netzroute
 verwendet. Neue Desktop-Terminals und SSH-Shells exportieren auch `LAB_IF`,

@@ -62,6 +62,8 @@ fi
         sage = Path(env["HOME"]) / "nmap-sage"
         assert sage.read_bytes() == (TRAINING / "scripts/nmap-sage").read_bytes()
         assert os.access(sage, os.X_OK)
+        visualizer = Path(env["HOME"]) / "Desktop/nmap-visualizer.html"
+        assert visualizer.read_bytes() == (TRAINING / "nmap-visualizer.html").read_bytes()
         results = Path(env["HOME"]) / "nmap-training-results"
         for name in (
             "targets.txt",
@@ -80,6 +82,7 @@ fi
         (results / "inventory.lua").write_text("-- participant Lua edits\n")
         nse_copy = Path(env["HOME"]) / "http-shop-policy.nse"
         nse_copy.write_text("participant NSE edits\n")
+        visualizer.write_text("participant visualizer edits\n")
         sage.write_text("participant helper edits\n")
         (results / "targets.txt").unlink()
         (results / "targets.txt").symlink_to(scratch / "participant-targets.txt")
@@ -87,12 +90,17 @@ fi
         assert (results / "http.args").read_text() == "participant edits\n"
         assert (results / "inventory.lua").read_text() == "-- participant Lua edits\n"
         assert nse_copy.read_text() == "participant NSE edits\n"
+        assert visualizer.read_text() == "participant visualizer edits\n"
         assert sage.read_text() == "participant helper edits\n"
         sage.unlink()
         sage.symlink_to(scratch / "participant-sage")
         run_shell(setup)
         assert sage.is_symlink(), "Keep participant helper links, even when their target is missing"
         assert (results / "targets.txt").is_symlink()
+        visualizer.unlink()
+        visualizer.symlink_to(scratch / "participant-visualizer.html")
+        run_shell(setup)
+        assert visualizer.is_symlink(), "Keep participant desktop links, even when their target is missing"
 
         # Exercise password initialization without changing the machine account.
         for name, body in {

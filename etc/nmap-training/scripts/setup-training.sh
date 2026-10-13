@@ -17,5 +17,9 @@ fi
 if [ ! -e "$HOME/nmap-sage" ] && [ ! -L "$HOME/nmap-sage" ]; then
     cp "$NMAP_TRAINING/scripts/nmap-sage" "$HOME/nmap-sage"
 fi
+mkdir -p "$HOME/Desktop"
+if [ ! -e "$HOME/Desktop/nmap-visualizer.html" ] && [ ! -L "$HOME/Desktop/nmap-visualizer.html" ]; then
+    cp "$NMAP_TRAINING/nmap-visualizer.html" "$HOME/Desktop/nmap-visualizer.html"
+fi
 printf 'Training ready: %s/nmap-training-results (LAB_IF=%s, SCAN_NETWORK=%s)\n' \
     "$HOME" "$LAB_IF" "$SCAN_NETWORK"
