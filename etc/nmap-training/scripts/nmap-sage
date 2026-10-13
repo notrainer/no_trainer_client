@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Print a short Nmap suggestion. Never execute it."""
+import json
+import os
+import sys
+import unicodedata
+from urllib.error import HTTPError, URLError
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+ENDPOINT = "https://llm.nmap.b3n.eu/v1/chat/completions"
+ERRORS = {
+    "nmap_only": "Nmap Sage only answers questions about Nmap.",
+    "invalid_request": "Send one question of at most 2,000 characters.",
+    "invalid_key": "The Nmap Sage API key is invalid or has been revoked.",
+    "rate_limit": "Too many requests. Try again in a minute.",
+    "upstream_unavailable": "Nmap Sage is temporarily unavailable. Try again later.",
+    "invalid_answer": "Nmap Sage could not produce a short answer. Try rephrasing the question.",
+    "budget_exhausted": "The course LLM spending limit has been reached. Contact the trainer.",
+}
+
+
+class NoRedirect(HTTPRedirectHandler):
+    # Keep the credential on the hardcoded HTTPS endpoint.
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def ask(question, key):
+    request = Request(
+        ENDPOINT,
+        data=json.dumps({"model": "nmap-sage", "messages": [{"role": "user", "content": question}]}).encode(),
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    with build_opener(NoRedirect()).open(request, timeout=35) as response:
+        data = response.read(65537)
+    if len(data) > 65536:
+        raise ValueError
+    answer = json.loads(data)["choices"][0]["message"]["content"]
+    if (not isinstance(answer, str) or not answer or len(answer) > 300
+            or any(unicodedata.category(c).startswith("C") or c in "\u2028\u2029" for c in answer)):
+        raise ValueError
+    return answer
+
+
+def main():
+    if sys.argv[1:] in (["--help"], ["-h"]):
+        print("Usage: nmap-sage QUESTION\nPrints a command or short explanation; never runs a scan.")
+        return 0
+    question = " ".join(sys.argv[1:]).strip()
+    if not question or len(question) > 2000:
+        print("Usage: nmap-sage QUESTION (at most 2,000 characters)", file=sys.stderr)
+        return 2
+    key = os.environ.get("NMAP_SAGE_API_KEY", "")
+    if not key:
+        print("Nmap Sage is not enabled. Ask the trainer to configure NMAP_SAGE_API_KEY.", file=sys.stderr)
+        return 1
+    try:
+        print(ask(question, key))
+    except HTTPError as error:
+        try:
+            details = json.loads(error.read(65536)).get("error", {})
+            code = next((details.get(name) for name in ("type", "param", "code")
+                         if isinstance(details.get(name), str) and details.get(name) in ERRORS), None)
+        except (ValueError, AttributeError):
+            code = None
+        message = ERRORS.get(code, f"Nmap Sage request failed (HTTP {error.code}). Contact the trainer.")
+        print(message, file=sys.stderr)
+        return 1
+    except (URLError, OSError):
+        print("Cannot reach Nmap Sage. Check your network connection and try again.", file=sys.stderr)
+        return 1
+    except (ValueError, KeyError, IndexError, TypeError):
+        print("Nmap Sage returned an invalid answer. Try again later.", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)

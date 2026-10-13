@@ -19,7 +19,9 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7.0.1
       - name: Check training scripts
-        run: python3 tests/check_training.py
+        run: |
+          python3 tests/check_training.py
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.4.1
       - name: Login to GitHub Container Registry

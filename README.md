@@ -40,6 +40,14 @@ verwendet. Neue Desktop-Terminals und SSH-Shells exportieren auch `LAB_IF`,
 Start die konkreten mDNS-/SSDP-Routen; dafür `NET_ADMIN` erlauben, für Raw Scans
 auch `NET_RAW`. Außerhalb des Labs werden ohne passende Route keine Routen gesetzt.
 
+Der optionale Helfer `nmap-sage` (auch `~/nmap-sage`) fragt den separaten
+LiteLLM-Service unter `https://llm.nmap.b3n.eu` nach einem Nmap-Befehl oder einer
+kurzen Erklärung. Er führt keine Befehle aus. Das Deployment setzt pro Client
+`NMAP_SAGE_API_KEY`; Desktop-Terminals und SSH-Shells laden diesen automatisch.
+Ohne Key bleibt der Helfer deaktiviert. Vorhandene Teilnehmerdateien und Links
+werden nicht ersetzt. Nutzung und Grenzen stehen im
+[Training-README](etc/nmap-training/README.md#nmap-sage).
+
 Die Referenzdateien wurden aus `../presentations/nmap-training/scripts/` und
 `../presentations/nmap-training/static/` übernommen. Bei Kursänderungen die
 betroffenen Kopien hier aktualisieren und das Image neu bauen. Das gebaute Image
@@ -47,6 +55,7 @@ muss vor dem volume-freien Classroom-Start auf dem Trainingshost verfügbar sein
 
 ```bash
 python3 tests/check_training.py
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
 ## SSH access

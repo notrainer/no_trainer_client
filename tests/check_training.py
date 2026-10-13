@@ -33,7 +33,7 @@ fi
         env = dict(os.environ, PATH=f"{scratch}:{os.environ['PATH']}",
                    HOME=str(scratch / "participant"), TEST_INTERFACE="eth7",
                    TEST_ROUTES=str(scratch / "routes.log"))
-        for name in ("SCAN_NETWORK", "SCAN_INTERFACE", "LAB_IF", "LAB_DNS", "LAB_DOMAIN"):
+        for name in ("SCAN_NETWORK", "SCAN_INTERFACE", "LAB_IF", "LAB_DNS", "LAB_DOMAIN", "NMAP_SAGE_API_KEY"):
             env.pop(name, None)
 
         def run_shell(source, overrides=None, check=True):
@@ -51,9 +51,17 @@ fi
         assert output.stdout == "172.28.50.11 eth7", output.stdout
         output = run_shell(f'. "{profile}"; printf "%s" "$SCAN_INTERFACE"', {"SCAN_INTERFACE": "eth9"})
         assert output.stdout == "eth9", output.stdout
+        (container_env / "NMAP_SAGE_API_KEY").write_text("test-sage-key")
+        output = run_shell(f'. "{profile}"; printf "%s" "$NMAP_SAGE_API_KEY"')
+        assert output.stdout == "test-sage-key"
+        output = run_shell(f'. "{profile}"; printf "%s" "$NMAP_SAGE_API_KEY"', {"NMAP_SAGE_API_KEY": "override-key"})
+        assert output.stdout == "override-key"
 
         setup = (TRAINING / "scripts/setup-training.sh").read_text()
         run_shell(setup)
+        sage = Path(env["HOME"]) / "nmap-sage"
+        assert sage.read_bytes() == (TRAINING / "scripts/nmap-sage").read_bytes()
+        assert os.access(sage, os.X_OK)
         results = Path(env["HOME"]) / "nmap-training-results"
         for name in (
             "targets.txt",
@@ -72,12 +80,18 @@ fi
         (results / "inventory.lua").write_text("-- participant Lua edits\n")
         nse_copy = Path(env["HOME"]) / "http-shop-policy.nse"
         nse_copy.write_text("participant NSE edits\n")
+        sage.write_text("participant helper edits\n")
         (results / "targets.txt").unlink()
         (results / "targets.txt").symlink_to(scratch / "participant-targets.txt")
         run_shell(setup)
         assert (results / "http.args").read_text() == "participant edits\n"
         assert (results / "inventory.lua").read_text() == "-- participant Lua edits\n"
         assert nse_copy.read_text() == "participant NSE edits\n"
+        assert sage.read_text() == "participant helper edits\n"
+        sage.unlink()
+        sage.symlink_to(scratch / "participant-sage")
+        run_shell(setup)
+        assert sage.is_symlink(), "Keep participant helper links, even when their target is missing"
         assert (results / "targets.txt").is_symlink()
 
         # Exercise password initialization without changing the machine account.

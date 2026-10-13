@@ -21,6 +21,7 @@ ip route get 239.255.255.250
 | `LAB_DNS` | `172.28.50.10`, expliziter DNS-Server für `dig` |
 | `LAB_DOMAIN` | `shop.test`, DNS-Zone |
 | `NMAP_TRAINING` | `/opt/nmap-training`, Referenzverzeichnis |
+| `NMAP_SAGE_API_KEY` | Eigener API-Key aus dem Deployment; leer deaktiviert Nmap Sage |
 
 Compose setzt die Vorgaben für alle sieben Clients. Docker-Umgebungsvariablen
 werden auch in neuen Desktop-Terminals und SSH-Shells geladen. Ein leeres
@@ -87,3 +88,21 @@ NSE-Scripts laufen dagegen mit `nmap` und dessen integrierter Lua-Laufzeit.
 Die Einrichtung setzt nur die zwei konkreten Multicast-Routen und kopiert Referenzen.
 `switch-ports.csv` und `traffic-summary.csv` enthalten ausdrücklich fiktive Daten.
 Trainerlösungen aus `tasks.txt` werden nicht ins Image kopiert.
+
+## Nmap Sage
+
+`nmap-sage` ist im Suchpfad und als `~/nmap-sage` verfügbar. Vorhandene Dateien
+oder Links werden beim Start nicht ersetzt. Neue Desktop-Terminals und
+SSH-Shells laden den eigenen API-Key aus der Container-Umgebung.
+
+```bash
+./nmap-sage how can I find vulnerabilities in vsftpd
+nmap-sage "Was bedeutet filtered in Nmap?"
+```
+
+Die Anfrage geht an `https://llm.nmap.b3n.eu/v1/chat/completions`. Die Antwort
+enthält einen Nmap-Befehl oder einen sehr kurzen Satz. `TARGET` bei Bedarf
+ersetzen. Das Script führt nichts aus und speichert keinen Gesprächsverlauf.
+Ohne `NMAP_SAGE_API_KEY` erklärt es, dass der Trainer den Dienst aktivieren muss.
+Der Server prüft das Thema, begrenzt Anfragen und lehnt Fragen außerhalb von
+Nmap ab. Den OpenRouter-Key niemals im Client setzen.

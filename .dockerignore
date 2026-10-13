@@ -3,3 +3,5 @@
 tests
 deploy
 README.md
+**/__pycache__
+**/*.py[cod]

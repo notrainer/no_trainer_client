@@ -14,5 +14,8 @@ done
 if [ ! -e "$HOME/http-shop-policy.nse" ] && [ ! -L "$HOME/http-shop-policy.nse" ]; then
     cp "$NMAP_TRAINING/scripts/http-shop-policy.nse" "$HOME/http-shop-policy.nse"
 fi
+if [ ! -e "$HOME/nmap-sage" ] && [ ! -L "$HOME/nmap-sage" ]; then
+    cp "$NMAP_TRAINING/scripts/nmap-sage" "$HOME/nmap-sage"
+fi
 printf 'Training ready: %s/nmap-training-results (LAB_IF=%s, SCAN_NETWORK=%s)\n' \
     "$HOME" "$LAB_IF" "$SCAN_NETWORK"

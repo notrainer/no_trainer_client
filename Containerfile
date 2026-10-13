@@ -14,6 +14,8 @@ RUN ln -s /etc/nmap-training /opt/nmap-training \
     && chmod -R a+rX /etc/nmap-training \
     && chmod a+r /etc/profile.d/nmap-training.sh \
     && chmod a+rx /etc/nmap-training/init-training.sh /etc/s6-overlay/s6-rc.d/svc-openssh-server/run \
+    && chmod a+rx /etc/nmap-training/scripts/nmap-sage \
+    && ln -s /etc/nmap-training/scripts/nmap-sage /usr/local/bin/nmap-sage \
     && passwd -l abc
 RUN lua -v && for script in /etc/nmap-training/examples/*.lua; do luac -p "$script"; done
 
