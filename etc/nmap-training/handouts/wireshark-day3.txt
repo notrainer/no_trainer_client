@@ -1,0 +1,135 @@
+TAG 3 – WIRESHARK-ARBEITSKARTE
+==========================
+In ~/nmap-training-results arbeiten. Jeden Capture in einer eigenen PCAPNG speichern.
+Capture VOR den Commands starten, danach stoppen und speichern. Bei Wiederholungen
+neue Dateinamen verwenden. Original-Captures und eigene NSE-Änderungen erhalten.
+
+INTERFACES UND RECHTE
+  ip -br address
+  ip route get 172.28.50.20
+  dumpcap -D
+  wireshark
+LAB_IF ist die Schnittstelle mit 172.28.50.101–107. Wireshark als Desktop-Benutzer
+starten. Bei fehlenden Capture-Interfaces prüft der Trainer dumpcap/Gruppenrechte.
+CLI-Fallback: tshark -i "$LAB_IF" -a duration:60 -f 'CAPTURE FILTER' -w FILE.pcapng
+Traffic-Commands während des Captures im zweiten Terminal ausführen. Danach die
+Datei in Wireshark öffnen. Nie zwei Captures gleichzeitig in dieselbe Datei schreiben.
+
+CAPTURE FILTER (vor Aufnahme) / DISPLAY FILTER (Filterleiste, dann Enter)
+  tcp port 80                      tcp.port == 80
+  host 172.28.50.20                 ip.addr == 172.28.50.20
+Display Filter erhalten die Originalpakete. Capture Filter verwerfen Pakete vor
+dem Speichern; das Leeren der Filterleiste holt diese Pakete nicht zurück.
+
+D3.1-A – HTTP STREAMS
+Capture Filter: arp or host 172.28.50.20 or host 172.28.50.21
+Commands:
+  curl --noproxy '*' -sS -o /dev/null http://172.28.50.20/maintenance/
+  curl --noproxy '*' -sS -o /dev/null http://172.28.50.21/maintenance/
+Speichern: day3-http.pcapng
+Display Filter:
+  http
+  http.request.uri == "/maintenance/"
+  http.response.code == 200 || http.response.code == 401
+GET auswählen -> Rechtsklick -> Follow -> TCP Stream. Pfad, Host, Status,
+Request-/Response-Frames und http.time finden. TCP-Aufbau und -Abbau betrachten.
+Stream-Filter leeren, bevor das zweite Ziel ausgewählt wird.
+
+D3.1-B – DISCOVERY UND GEMESSENE RATEN (Trainer startet media)
+  tshark -i "$LAB_IF" -a duration:60 -f 'arp or (udp and (port 67 or 68 or 5353 or 1900))' -w day3-discovery.pcapng
+Zweites Terminal:
+  sudo nmap -e "$LAB_IF" --script broadcast-upnp-info
+Display Filter:
+  udp.port == 1900
+  ip.src == 172.28.50.70 && udp.port == 1900
+M-SEARCH, Antwort und unaufgefordertes NOTIFY finden; Richtung/USN/LOCATION notieren.
+Statistics -> Protocol Hierarchy / Endpoints / Conversations: ungefilterte und
+gefilterte Ansicht vergleichen; Limit to display filter ausdrücklich prüfen.
+Statistics -> I/O Graphs: Interval 1 s, Packets, danach Bytes. Zwei Graphen mit
+obigen Filtern hinzufügen und exportieren. Spitzenintervall von Count / 60 s
+trennen. Capture-Start/-Ende notieren; erste bis letzte Paketzeit kann kürzer sein.
+  tshark -n -r day3-discovery.pcapng -Y 'udp.port == 1900' -T fields -E header=y -e frame.time_relative -e frame.len -e ip.src -e ip.dst -e udp.srcport -e udp.dstport > day3-ssdp.tsv
+  tshark -n -r day3-discovery.pcapng -q -z 'io,stat,1,ip.src == 172.28.50.70 && udp.port == 1900'
+traffic-summary.csv und switch-ports.csv enthalten fiktive Falldaten. Deren Zahlen
+nicht als Messungen aus dem eigenen Capture bezeichnen.
+
+D3.2-A – ECHTES IPv6-ZIEL (Trainer aktiviert Dual Stack im Lab)
+  ip -br -6 address
+  ip -6 route get fd28:50::20
+LAB_IF trägt sowohl 172.28.50.101–107 als auch fd28:50::101–107.
+Vor der ersten IPv6-Anfrage aufnehmen:
+  tshark -i "$LAB_IF" -a duration:60 -f 'icmp6 or (ip6 and tcp)' -w day3-ipv6.pcapng
+Zweites Terminal:
+  nmap -n -sT -p 80,81,443 --reason -oA day3-dualstack-v4 appliance
+  nmap -6 -n -sT -p 80,81,443 --reason -oA day3-dualstack-v6 appliance
+  dig +short appliance
+  dig +short AAAA appliance
+  curl --noproxy '*' -4 http://appliance/maintenance/
+  curl --noproxy '*' -6 http://appliance/maintenance/
+Display Filter:
+  icmpv6.type == 135 || icmpv6.type == 136
+  ipv6.addr == fd28:50::20 && tcp
+Target Address/MAC von NS/NA sowie TCP-Aufbau und RST dokumentieren. Bei gecachtem
+NDP ip -6 neigh notieren; gezielten Reset mit dem Trainer abstimmen. Beide obigen
+Adressen gehören derselben appliance: A=172.28.50.20, AAAA=fd28:50::20.
+curl appliance wählt selbst; -4/-6 erzwingen die jeweilige Familie. Das /64
+nicht vollständig scannen. Der Lab-DNS kennt auch appliance.shop.test mit A/AAAA.
+
+D3.2-B – SYN / CONNECT (ursprüngliches LAB_IF)
+Capture Filter: arp or host 172.28.50.20
+  sudo nmap -n -Pn -sS -p 80,81 --reason 172.28.50.20
+  nmap -n -Pn -sT -p 80,81 --reason 172.28.50.20
+Speichern: day3-scan-types.pcapng. Startzeit jedes Commands notieren.
+Display: tcp.flags.syn == 1 / tcp.flags.reset == 1; ganze Streams betrachten.
+Kein -sV/NSE in diesem Vergleich. Beide Scanarten können RST erzeugen.
+
+D3.2-C – KONTROLLIERTE UNTERBRECHUNG (Trainer koordiniert Stop/Start)
+  nmap -n -sT -sV --version-light -p 80,443 -oA day3-web-control 172.28.50.20 172.28.50.21
+Capture starten: arp or host 172.28.50.20 or host 172.28.50.21
+Nachdem der Trainer appliance stoppt:
+  nmap -n -sT -sV --version-light -p 80,443 -oA day3-web-after 172.28.50.20 172.28.50.21
+  diff -u day3-web-control.nmap day3-web-after.nmap
+Speichern: day3-outage.pcapng. Letzte beantwortete Phase und Kontrolltarget nennen.
+Nach dem Neustart durch den Trainer die Rückkehr der HTTP-Antwort bestätigen.
+
+D3.N – EIGENE NSE-ANFRAGE UND SCRIPT-ERGEBNIS
+~/http-shop-policy.nse und eigene Änderungen aus D3.3 erhalten.
+Capture Filter: host 172.28.50.20 or host 172.28.50.21
+  nmap -n -sT -p 80 --script ~/http-shop-policy.nse -oA day3-check-packets appliance appliance-managed
+Speichern: day3-nse.pcapng. CLI-Pfad -> GET -> Status -> observed_status zuordnen.
+Neuer Capture, day3-nse-invalid.pcapng:
+  nmap -n -sT -p 80 --script ~/http-shop-policy.nse --script-args 'http-shop-policy.expected-status=700' appliance
+Anwendungsanfragen, Portscan-Verbindungen und Validierungsfehler vergleichen.
+
+D3.4-A – DNS UDP/TCP (LAB_IF)
+Capture Filter: host 172.28.50.10 and port 53
+  dig @172.28.50.10 appliance.shop.test A +notcp
+  dig @172.28.50.10 appliance.shop.test A +tcp
+Speichern: day3-dns.pcapng. Display: dns && udp / dns && tcp
+Query/Response über Name, ID, Adressen/Ports und Frame-Referenzen verbinden.
+QR, RCODE, Answers und dns.time lesen; TCP-Verbindung ebenfalls erklären.
++tcp fordert TCP ausdrücklich an und zeigt keinen Truncation-Fallback.
+
+D3.4-B – TLS (LAB_IF)
+Capture Filter: host 172.28.50.20 and tcp port 443
+  curl --noproxy '*' -k -sS --resolve appliance.shop.test:443:172.28.50.20 -o /dev/null https://appliance.shop.test/maintenance/
+Speichern: day3-tls.pcapng.
+Display: tls.handshake.type == 1 / tls.handshake.type == 2
+SNI, gewählte Version/Cipher und verschlüsselte Records finden. Für TLS 1.3
+tls.handshake.extensions.supported_version statt nur Legacy Record Version lesen.
+Ohne Schlüssel keinen HTTP-Status aus dem HTTPS-Capture behaupten.
+
+D3.4-C – EXPERT INFORMATION UND NACHWEISE
+Analyze -> Expert Information. Zu jeder Warnung den gesamten Stream prüfen.
+  tcp.analysis.retransmission
+  tcp.analysis.lost_segment
+  tcp.analysis.duplicate_ack
+  tcp.flags.reset == 1
+Keine Warnung ist ein gültiges Ergebnis. Vor Verlustdiagnose Capture-Vollständigkeit
+und Checksum-Offload prüfen. Ein SYN-Scan-Reset ist erwartetes Transportverhalten.
+
+ABGABE
+Command / Zeitpunkt / Quelle / Ziel / Interface:
+PCAPNG / Frame-Nummern / Stream / Display Filter:
+Beobachtete Antwort oder Count / Messfenster / Kontrollfall:
+Aussage / was bleibt ungeprüft / nächster Prüfschritt:

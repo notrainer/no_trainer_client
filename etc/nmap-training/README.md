@@ -54,6 +54,7 @@ sudo env SCAN_INTERFACE="$SCAN_INTERFACE" /opt/nmap-training/scripts/multicast-r
 | `scripts/web-baseline.sh` | D1.4 / D3.2: identischer Scan der beiden Webziele |
 | `scripts/compare-scans.sh` | D3.2: Textvergleich; Exit 1 bedeutet Unterschiede |
 | `scripts/capture-discovery.sh` | D3.1: auf 60 Sekunden begrenzter Capture |
+| `handouts/wireshark-day3.txt` | D3: Wireshark-Streams, Graphs, IPv6/NDP, DNS und TLS |
 | `scripts/multicast-routes.sh` | D2.3: mDNS-/SSDP-Routen im Client, beim Start vorbereitet |
 
 Die Shell-/Python-Hilfen liegen zusätzlich als bearbeitbare Kopien im Ergebnisordner.
@@ -88,6 +89,26 @@ NSE-Scripts laufen dagegen mit `nmap` und dessen integrierter Lua-Laufzeit.
 Die Einrichtung setzt nur die zwei konkreten Multicast-Routen und kopiert Referenzen.
 `switch-ports.csv` und `traffic-summary.csv` enthalten ausdrücklich fiktive Daten.
 Trainerlösungen aus `tasks.txt` werden nicht ins Image kopiert.
+
+## Tag 3 mit Wireshark
+
+Die Arbeitskarte `~/nmap-training-results/wireshark-day3.txt` enthält Capture-
+und Display Filter, Commands, Dateinamen und Abgaben. Wireshark als `abc` starten;
+die Gruppe `wireshark` erlaubt Capture über `dumpcap`. Keine GUI mit sudo starten.
+Bei fehlenden Interfaces `id` und `dumpcap -D` durch den Trainer prüfen lassen;
+alternativ mit `tshark` erfassen und danach die Datei in der GUI öffnen.
+
+Die neue Kurs-Compose stellt die bestehende `nmap`-Bridge auf Dual Stack um.
+Dieselbe `appliance` besitzt dann `172.28.50.20` und `fd28:50::20`; Docker-DNS
+liefert A/AAAA für `appliance`. Der Lab-DNS kennt auch `appliance.shop.test` und
+den Kurznamen mit beiden Adressen. `curl appliance` wählt selbst, `curl -4 appliance`
+und `curl -6 appliance` erzwingen IPv4/IPv6. `LAB_IF` ist für beide Familien dieselbe
+Schnittstelle. Die Bridge muss im Wartungsfenster neu erstellt werden; ein
+Client-Image-Update allein aktiviert Dual Stack nicht.
+
+Vorhandene Arbeitskopien bleiben erhalten. Falls die neue Karte fehlt, nach dem
+Image-Update `/opt/nmap-training/scripts/setup-training.sh` ausführen. Alternativ
+die Kursdatei `static/wireshark-day3.txt` in den eigenen Ergebnisordner kopieren.
 
 ## Nmap Sage
 

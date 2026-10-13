@@ -29,6 +29,11 @@ Für den Lua-Einstieg an Tag 2 sind außerdem `lua`, `luac` und drei eigenständ
 Beispielprogramme enthalten. Die Beispiele verwenden feste Lehrwerte und führen
 keine Scans aus; Nmap bringt für NSE weiterhin seine eigene Lua-Laufzeit mit.
 
+Tag 3 verwendet die [Wireshark-Arbeitskarte](etc/nmap-training/handouts/wireshark-day3.txt)
+für HTTP-Streams, Statistiken, DNS-/TLS-Captures und IPv6/NDP. Sie wird als fehlende
+Arbeitskopie beim Start angelegt. IPv6 wird für dieselbe appliance und das bestehende
+Übungsnetz in der Kurs-Compose aktiviert; das Client-Image liefert die Werkzeuge.
+
 Beim Start werden fehlende Arbeitskopien für den Desktop-Benutzer in
 `~/nmap-training-results/` und `~/http-shop-policy.nse` angelegt. Neustarts und
 `setup-training.sh` überschreiben keine vorhandenen Teilnehmerdateien.
