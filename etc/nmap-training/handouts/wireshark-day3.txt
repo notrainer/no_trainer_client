@@ -53,17 +53,16 @@ trennen. Capture-Start/-Ende notieren; erste bis letzte Paketzeit kann kürzer s
 traffic-summary.csv und switch-ports.csv enthalten fiktive Falldaten. Deren Zahlen
 nicht als Messungen aus dem eigenen Capture bezeichnen.
 
-D3.2-A – ECHTES IPv6-ZIEL (Trainer aktiviert Dual Stack im Lab)
+D3.2-A – IPv6-ZIEL (Dual Stack vor dem Kurs vorbereitet)
   ip -br -6 address
   ip -6 route get fd28:50::20
 LAB_IF trägt sowohl 172.28.50.101–107 als auch fd28:50::101–107.
-Vor der ersten IPv6-Anfrage aufnehmen:
+DNS vorab prüfen: dig +short appliance / dig +short AAAA appliance.
+Vor dem ersten IPv6-Scan oder curl-Zugriff aufnehmen:
   tshark -i "$LAB_IF" -a duration:60 -f 'icmp6 or (ip6 and tcp)' -w day3-ipv6.pcapng
 Zweites Terminal:
   nmap -n -sT -p 80,81,443 --reason -oA day3-dualstack-v4 appliance
   nmap -6 -n -sT -p 80,81,443 --reason -oA day3-dualstack-v6 appliance
-  dig +short appliance
-  dig +short AAAA appliance
   curl --noproxy '*' -4 http://appliance/maintenance/
   curl --noproxy '*' -6 http://appliance/maintenance/
 Display Filter:
@@ -75,7 +74,7 @@ Adressen gehören derselben appliance: A=172.28.50.20, AAAA=fd28:50::20.
 curl appliance wählt selbst; -4/-6 erzwingen die jeweilige Familie. Das /64
 nicht vollständig scannen. Der Lab-DNS kennt auch appliance.shop.test mit A/AAAA.
 
-D3.2-B – SYN / CONNECT (ursprüngliches LAB_IF)
+D3.2-B – SYN / CONNECT (LAB_IF)
 Capture Filter: arp or host 172.28.50.20
   sudo nmap -n -Pn -sS -p 80,81 --reason 172.28.50.20
   nmap -n -Pn -sT -p 80,81 --reason 172.28.50.20
@@ -128,7 +127,12 @@ Analyze -> Expert Information. Zu jeder Warnung den gesamten Stream prüfen.
 Keine Warnung ist ein gültiges Ergebnis. Vor Verlustdiagnose Capture-Vollständigkeit
 und Checksum-Offload prüfen. Ein SYN-Scan-Reset ist erwartetes Transportverhalten.
 
-ABGABE
+ABGABE UND GEGENSEITIGER REVIEW
+Eigene NSE-Datei mit target/port/server und passende XML-Ergebnisse aus D3.N-C
+beilegen. Script-Version und Argumente den Dateien zuordnen. Captures vor der
+Header-Erweiterung entsprechend kennzeichnen; nur nach weiteren Codeänderungen
+einen neuen Prüflauf erzeugen. D3.1/D3.2-Captures wiederverwenden.
+Ein anderes Team prüft eine belegte Aussage und einen offenen Punkt.
 Command / Zeitpunkt / Quelle / Ziel / Interface:
 PCAPNG / Frame-Nummern / Stream / Display Filter:
 Beobachtete Antwort oder Count / Messfenster / Kontrollfall:

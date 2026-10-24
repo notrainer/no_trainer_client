@@ -9,7 +9,7 @@ Does not authenticate, follow redirects, or change configuration.
 ]]
 
 author = "Benjamin Akhras"
-license = "Same as Nmap--See https://nmap.org/book/man-legal.html"
+license = "GPLv2"
 categories = { "discovery", "safe" }
 
 -- @usage nmap -sV -p 80 --script ./scripts/http-shop-policy.nse appliance
