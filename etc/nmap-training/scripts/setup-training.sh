@@ -11,9 +11,11 @@ for file in "$NMAP_TRAINING"/handouts/* "$NMAP_TRAINING"/examples/* \
         cp "$file" "$destination"
     fi
 done
-if [ ! -e "$HOME/http-shop-policy.nse" ] && [ ! -L "$HOME/http-shop-policy.nse" ]; then
-    cp "$NMAP_TRAINING/scripts/http-shop-policy.nse" "$HOME/http-shop-policy.nse"
-fi
+for script in http-shop-policy.nse http-php2shell-version.nse; do
+    if [ ! -e "$HOME/$script" ] && [ ! -L "$HOME/$script" ]; then
+        cp "$NMAP_TRAINING/scripts/$script" "$HOME/$script"
+    fi
+done
 if [ ! -e "$HOME/nmap-sage" ] && [ ! -L "$HOME/nmap-sage" ]; then
     cp "$NMAP_TRAINING/scripts/nmap-sage" "$HOME/nmap-sage"
 fi

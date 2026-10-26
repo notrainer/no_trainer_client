@@ -80,6 +80,9 @@ fi
             assert (results / name).is_file(), name
         (results / "http.args").write_text("participant edits\n")
         (results / "inventory.lua").write_text("-- participant Lua edits\n")
+        php_copy = Path(env["HOME"]) / "http-php2shell-version.nse"
+        assert php_copy.read_bytes() == (TRAINING / "scripts/http-php2shell-version.nse").read_bytes()
+        php_copy.write_text("participant PHP check edits\n")
         nse_copy = Path(env["HOME"]) / "http-shop-policy.nse"
         nse_copy.write_text("participant NSE edits\n")
         visualizer.write_text("participant visualizer edits\n")
@@ -89,6 +92,7 @@ fi
         run_shell(setup)
         assert (results / "http.args").read_text() == "participant edits\n"
         assert (results / "inventory.lua").read_text() == "-- participant Lua edits\n"
+        assert php_copy.read_text() == "participant PHP check edits\n"
         assert nse_copy.read_text() == "participant NSE edits\n"
         assert visualizer.read_text() == "participant visualizer edits\n"
         assert sage.read_text() == "participant helper edits\n"

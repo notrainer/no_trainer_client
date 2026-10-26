@@ -127,3 +127,19 @@ ersetzen. Das Script führt nichts aus und speichert keinen Gesprächsverlauf.
 Ohne `NMAP_SAGE_API_KEY` erklärt es, dass der Trainer den Dienst aktivieren muss.
 Der Server prüft das Thema, begrenzt Anfragen und lehnt Fragen außerhalb von
 Nmap ab. Den OpenRouter-Key niemals im Client setzen.
+
+## PHP2Shell-Versionscheck (D3.N-PHP)
+
+`~/http-php2shell-version.nse` enthält die vollständige Kursreferenz. Der Check
+liest den PHP-Header von `http://appliance/php-version.php` und vergleicht ihn
+mit den Upstream-Fixes vom 21.10.2026. Versionshinweise sind kein Exploitnachweis;
+fehlende Header, Backports und unbekannte Zweige erfordern weitere Prüfung.
+Nach dem CI-Image-Update legt `setup-training.sh` die fehlende Kopie an, ohne
+Teilnehmerdateien zu überschreiben. Referenzquelle:
+`nmap-training/scripts/http-php2shell-version.nse`.
+
+D3.N-PATCH ergänzt den Vorher-/Nachher-Vergleich: Das Lab startet mit PHP 8.5.11.
+Der Trainer führt auf dem **Trainerhost** `bash patch-php.sh` aus und wechselt
+auf PHP 8.5.12. Im Client denselben NSE-Scan mit `-oA day3-php-before` bzw.
+`-oA day3-php-after` speichern und mit `diff -u` vergleichen. Das Patch-Script
+ist ein Administratorwerkzeug auf dem Host und wird nicht in Clients kopiert.

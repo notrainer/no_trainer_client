@@ -30,9 +30,12 @@ Beispielprogramme enthalten. Die Beispiele verwenden feste Lehrwerte und führen
 keine Scans aus; Nmap bringt für NSE weiterhin seine eigene Lua-Laufzeit mit.
 
 Tag 3 verwendet die [Wireshark-Arbeitskarte](etc/nmap-training/handouts/wireshark-day3.txt)
-für HTTP-Streams, Statistiken, DNS-/TLS-Captures und IPv6/NDP. Sie wird als fehlende
-Arbeitskopie beim Start angelegt. IPv6 wird für dieselbe appliance und das bestehende
-Übungsnetz in der Kurs-Compose aktiviert; das Client-Image liefert die Werkzeuge.
+für HTTP-Streams, Statistiken, DNS-/TLS-Captures und IPv6/NDP. Capture-Reihenfolge
+und Abschlussreview entsprechen dem Kurs: vor dem ersten IPv6-Zugriff aufnehmen,
+vorhandene Nachweise weiterverwenden und die eigene NSE-Datei samt XML zuordnen.
+Fehlende Arbeitskopien werden beim Start angelegt. IPv6 wird für dieselbe appliance
+und das bestehende Übungsnetz in der Kurs-Compose aktiviert; das Client-Image liefert
+die Werkzeuge.
 
 Beim Start werden fehlende Arbeitskopien für den Desktop-Benutzer in
 `~/nmap-training-results/` und `~/http-shop-policy.nse` angelegt. Neustarts und
@@ -128,3 +131,19 @@ The old `ghcr.io/b3n4kh/no_trainer_client` package remains available for existin
 deployments. Switch their image reference only after the new package is published
 and public, or a read-only registry login is configured. The separate
 `ghcr.io/b3n4kh/nmap` Zenmap base image remains unchanged.
+
+## PHP2Shell-Versionscheck (D3.N-PHP)
+
+`~/http-php2shell-version.nse` enthält die vollständige Kursreferenz. Der Check
+liest den PHP-Header von `http://appliance/php-version.php` und vergleicht ihn
+mit den Upstream-Fixes vom 21.10.2026. Versionshinweise sind kein Exploitnachweis;
+fehlende Header, Backports und unbekannte Zweige erfordern weitere Prüfung.
+Nach dem CI-Image-Update legt `setup-training.sh` die fehlende Kopie an, ohne
+Teilnehmerdateien zu überschreiben. Referenzquelle:
+`nmap-training/scripts/http-php2shell-version.nse`.
+
+D3.N-PATCH ergänzt den Vorher-/Nachher-Vergleich: Das Lab startet mit PHP 8.5.11.
+Der Trainer führt auf dem **Trainerhost** `bash patch-php.sh` aus und wechselt
+auf PHP 8.5.12. Im Client denselben NSE-Scan mit `-oA day3-php-before` bzw.
+`-oA day3-php-after` speichern und mit `diff -u` vergleichen. Das Patch-Script
+ist ein Administratorwerkzeug auf dem Host und wird nicht in Clients kopiert.
