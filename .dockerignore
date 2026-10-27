@@ -1,6 +1,7 @@
 .git
 .github
-tests
+tests/*
+!tests/check_display.sh
 deploy
 README.md
 **/__pycache__
