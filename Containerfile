@@ -1,5 +1,6 @@
 FROM ghcr.io/b3n4kh/nmap:latest@sha256:d939755e48a65b8c2b0cc2262b0795665dd5bbe67b8ce373774f1b84e834140f AS zenmap
-FROM lscr.io/linuxserver/webtop:fedora-xfce@sha256:953cf5572a4834bb28b127e2253fd3f1cbc4fead64ff96c5c8d066c281061d8a
+FROM lscr.io/linuxserver/webtop:fedora-xfce@sha256:953cf5572a4834bb28b127e2253fd3f1cbc4fead64ff96c5c8d066c281061d8a AS webtop
+FROM webtop
 
 # The base image skips documentation; keep manuals and restore any inherited packages' pages.
 RUN sed -i '/^[[:space:]]*tsflags[[:space:]]*=/d' /etc/dnf/dnf.conf \
@@ -32,5 +33,10 @@ COPY --from=zenmap /nmap/zenmap/install_scripts/unix/zenmap.desktop /usr/share/a
 RUN pip install /tmp/zenmap-7.95+svn-py3-none-any.whl
 
 ############
+
+# Fedora updates replace Webtop's patched Xvfb and break dynamic resolution.
+COPY --from=webtop /usr/bin/Xvfb /usr/bin/Xvfb
+COPY tests/check_display.sh /tmp/check_display.sh
+RUN bash /tmp/check_display.sh && rm /tmp/check_display.sh
 
 EXPOSE 2222

@@ -125,6 +125,21 @@ update those pins deliberately when upgrading the base images.
 The image carries its source revision as an OCI label.
 Manual pages are enabled in the image; the build verifies that `man nmap` renders successfully.
 
+The build also restores Webtop's patched `/usr/bin/Xvfb` after Fedora package
+updates. Fedora's replacement limits the virtual screen to 1280×1024 and prevents
+Selkies from resizing it to the browser window. `tests/check_display.sh` runs
+against a separate X server during the image build and checks growing to
+2560×1440, shrinking and growing again. Keep the restore and check after all
+package installation steps.
+
+To activate this fix, publish the image in CI, then pull and recreate only the
+affected client services, preserving their `/config` and SSH host-key mounts.
+Save open work first: recreating a client closes its running desktop applications.
+Retain the previous image for rollback and verify browser resizing after activation.
+In Selkies Screen Settings, use **Reset to Window** to clear a saved manual
+resolution. **Scale Locally** changes browser scaling; it cannot bypass a server
+resolution limit.
+
 The repository moved to `notrainer/no_trainer_client`. Existing clones should use
 `git remote set-url origin git@github.com:notrainer/no_trainer_client.git`.
 The old `ghcr.io/b3n4kh/no_trainer_client` package remains available for existing
